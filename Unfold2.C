@@ -103,15 +103,7 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
         TCut TriggerSelectionPP;
         TCut TriggerSelectionPbPb80;
 
-	if (isMC) {
-	         // MC closure test, no reweighting
-		dataSelection = "weight*(abs(refparton_flavorForB)==5&&abs(jteta)<2)";//Form("abs(vz)<15&&trackMax/jtpt>0.01&&abs(jteta)<2&&jtpt>%.0f&&trackMax>%f",recoJetPtCut,trackMaxPtCut);
-	} else {
-		dataSelection = "";
-		dataSelectionPP = "";
-                TriggerSelectionPP = "";//"HLT_Jet60_v1";
-                TriggerSelectionPbPb80 ="HLT_HIJet80_v1";
-	}
+	dataSelection = "weight*(abs(refparton_flavorForB)==5&&abs(jteta)<2)";//Form("abs(vz)<15&&trackMax/jtpt>0.01&&abs(jteta)<2&&jtpt>%.0f&&trackMax>%f",recoJetPtCut,trackMaxPtCut);
 		
    	
 	// Read data file
@@ -120,7 +112,6 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 	
 	if (isMC) {
                 infData = new TFile("/d102/mnguyen/bTaggingOutput/ntuples/PbPbBMC_pt30by3_ipHICalibCentWeight_noTrig.root");   
-//   	   infData = new TFile("/d100/yjlee/hiForest/btagging/matt/unfolding/RooUnfold-1.1.1/pp/ppMC_ppReco_BjetTrig_noIPupperCut.root");
 		cout << "This is a MC closure test"<<endl;
 	} else {
                 infData = new TFile("/d102/mnguyen/bTaggingOutput/ntuples/PbPbBMC_pt30by3_ipHICalibCentWeight_noTrig.root");   
@@ -220,12 +211,12 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 				if ( data[i]->refpt<0) data[i]->refpt=0;
 				if ( fabs(data[i]->refparton_flavorForB)!=5) continue;
 				if ( data[i]->discr_ssvHighEff<2) continue;
-					if (data[i]->jtpt < 60) continue;
+				if ( data[i]->jtpt < 60) continue;
 
 				if (!isMC||jentry2 % 2 == 1) {
 					uhist[cBin]-> hMatrix->Fill(data[i]->refpt,data[i]->jtpt,data[i]->weight);
 				}	  
-				if (isMC&&jentry2 % 2 == 0) {
+				if (jentry2 % 2 == 0) {
 					uhist[cBin]-> hGen->Fill(data[i]->refpt,data[i]->weight);   
 					uhist[cBin]-> hMeas->Fill(data[i]->jtpt,data[i]->weight);  	 
 					uhist[cBin]-> hMeasJECSys->Fill(data[i]->jtpt*(1.+0.02/nbins_cent*(nbins_cent-i)),data[i]->weight); 
@@ -243,7 +234,6 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 			<<endl;
 			for (Long64_t jentry2=0; jentry2<dataPP[i]->tJet->GetEntries();jentry2++) {
 				dataPP[i]->tJet->GetEntry(jentry2);
-	//			if(dataPP[i]->pthat<boundariesPP_pthat[i] || dataPP[i]->pthat>boundariesPP_pthat[i+1]) continue;
 
 				int subEvt=-1;
 				if ( dataPP[i]->refpt<0) continue;
@@ -251,12 +241,12 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 				if ( dataPP[i]->refpt<0) dataPP[i]->refpt=0;
 				if ( fabs(dataPP[i]->refparton_flavorForB)!=5) continue;
 				if ( dataPP[i]->discr_ssvHighEff<2) continue;
-					if (dataPP[i]->jtpt < 60) continue;
+				if ( dataPP[i]->jtpt < 60) continue;
 					
 				if (!isMC||jentry2 % 2 == 1) {
 					uhist[nbins_cent]-> hMatrix->Fill(dataPP[i]->refpt,dataPP[i]->jtpt,dataPP[i]->weight);
 				}	  
-				if (isMC&&jentry2 % 2 == 0) {
+				if (jentry2 % 2 == 0) {
 					uhist[nbins_cent]-> hGen->Fill(dataPP[i]->refpt,dataPP[i]->weight);   
 					uhist[nbins_cent]-> hMeas->Fill(dataPP[i]->jtpt,dataPP[i]->weight); 
 				}           
@@ -287,7 +277,6 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 				
 				for (int x=1;x<=uhist[i]->hMatrix->GetNbinsX();x++) {	   
 					double ratio = 1;
-					//if (hGenSpectraCorr->GetBinContent(x)!=0) ratio = 1e5/hGenSpectraCorr->GetBinContent(x);
 					uhist[i]->hMatrix->SetBinContent(x,y,uhist[i]->hMatrix->GetBinContent(x,y)*ratio);
 					uhist[i]->hMatrix->SetBinError(x,y,uhist[i]->hMatrix->GetBinError(x,y)*ratio);
 				}
@@ -308,8 +297,6 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 				if (sum==0) continue;
 				double ratio = uhist[i]->hMeas->GetBinContent(y)/sum;
 				if (uhist[i]->hMeas->GetBinContent(y)==0) ratio = 1e-100/sum;
-				//uhist[i]->hResponse->SetBinContent(x,y,uhist[i]->hResponse->GetBinContent(x,y)*ratio);
-				//uhist[i]->hResponse->SetBinError(x,y,uhist[i]->hResponse->GetBinError(x,y)*ratio);
 			}
 		}
 		
@@ -334,21 +321,41 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 		
 		uhist[i]->hResponse->Draw("col");
 		
-//		if (!useMatrixFromFile) uhist[i]->hMatrixFit = fitMatrix(uhist[i]->hResponseNorm,recoJetPtCut);
 		if (!useMatrixFromFile) uhist[i]->hMatrixFit = uhist[i]->hMatrix;
 		uhist[i]->hMatrixFit->SetName(Form("hMatrixFit_cent%d",i));
 	}
 
-//	TFile *infMatt = new TFile("NewFormatV3_bFractionMCTemplate_ppPbPb1_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");
-	TFile *infMatt = new TFile("/d102/mnguyen/bTaggingOutput/histos/AltBinningV5_bFractionMCTemplate_ppPbPb1_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");
-	TH1F *hMatt = (TH1F*) infMatt->Get("hRawBData");
-	for (int i=1;i<=hMatt->GetNbinsX();i++)
-	{
-	   uhist[0]->hMeas->SetBinContent(i+uhist[0]->hMeas->FindBin(61)-1,hMatt->GetBinContent(i));  
-	   uhist[0]->hMeas->SetBinError(i+uhist[0]->hMeas->FindBin(61)-1,hMatt->GetBinError(i));  
-	}
-        divideBinWidth(hMatt);
+        if (isMC==0) {
+  	   // Use measured histogram from Matt & Kurt's file
+	   
+	   // PbPb file:
+	   TFile *infMatt = new TFile("/d102/mnguyen/bTaggingOutput/histos/AltBinningV5_bFractionMCTemplate_ppPbPb1_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");
+	   TH1F *hMattPbPb = (TH1F*) infMatt->Get("hRawBData");
+	   divideBinWidth(hMattPbPb);
+           
+	   // Need to match the binning carefully, please double check whenever you change the binning
+	   for (int i=1;i<=hMattPbPb->GetNbinsX();i++)
+  	   {
+	      uhist[0]->hMeas->SetBinContent(i+uhist[0]->hMeas->FindBin(61)-1,hMattPbPb->GetBinContent(i));  
+	      uhist[0]->hMeas->SetBinError(i+uhist[0]->hMeas->FindBin(61)-1,hMattPbPb->GetBinError(i));  
+ 	   }
 
+	   // pp file:
+	   // The file name needs to be updated!!!!!
+	   TFile *infMattPP = new TFile("NewFormatV3_bFractionMCTemplate_ppPbPb1_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");///d102/mnguyen/bTaggingOutput/histos/AltBinningV5_bFractionMCTemplate_ppPbPb1_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root");
+	   TH1F *hMattPP = (TH1F*) infMattPP->Get("hRawBData");
+	   divideBinWidth(hMattPP);
+	   
+	   // Need to match the binning carefully, please double check whenever you change the binning
+	   for (int i=1;i<=hMattPP->GetNbinsX();i++)
+  	   {
+	      uhist[nbins_cent]->hMeas->SetBinContent(i+uhist[nbins_cent]->hMeas->FindBin(61)-1,hMattPP->GetBinContent(i));  
+	      uhist[nbins_cent]->hMeas->SetBinError(i+uhist[nbins_cent]->hMeas->FindBin(61)-1,hMattPP->GetBinError(i));  
+ 	   }
+
+	}   
+
+ 
         pbpb_Unfo->cd();
 	
 	cout << "==================================== TEST =====================================" << endl;
@@ -358,8 +365,8 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 	char chmet[100]; 
 	
 	// ======================= Reconstructed pp and PbPb spectra =========================================================
-	TCanvas * cPbPb = new TCanvas("cPbPb","PbPb",1200,800);
-	cPbPb->Divide(1,1); 
+	TCanvas * cPbPb = new TCanvas("cPbPb","PbPb",1200,600);
+	cPbPb->Divide(2,1); 
 	cPbPb->cd(1);
 	
 	
@@ -383,10 +390,6 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 		myPrior.unfold(uhist[i]->hMeas,1);
 		TH1F *hPrior;//=(TH1F*) functionHist(fPow,uhist[i]->hMeas,Form("hPrior_cent%d",i));
 		hPrior = (TH1F*)uhist[i]->hGen->Clone("hPrior");//(TH1F*)uhist[i]->hMeas->Clone(Form("hPrior_cent%d",i));
-//		hPrior = (TH1F*)myPrior.hPrior->Clone("hPrior");//
-//		hPrior = (TH1F*)uhist[i]->hMeas->Clone(Form("hPrior_cent%d",i));
-//		hPrior = (TH1F*)uhist[i]->hRecoBinByBin->Clone(Form("hPrior_cent%d",i));
-//		hPrior->Scale(uhist[i]->hMeas->Integral(0,1000)/uhist[i]->hRecoBinByBin->Integral(0,1000));
 		removeZero(hPrior);
 		
 		bayesianUnfold myUnfoldingJECSys(uhist[i]->hMatrixFit,hPrior,0);
@@ -489,16 +492,84 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 		uhist[i]->hReco->Draw("same");    
 		uhist[i]->hRecoBinByBin->SetMarkerStyle(28);
 		uhist[i]->hRecoBinByBin->Draw("same");    
-		uhist[i]->hReco->SetAxisRange(90,300);
-		    TH1F *hReproduced = (TH1F*)myUnfolding.hReproduced->Clone(Form("hReproduced_cent%d",i));
-		      hReproduced->SetMarkerColor(4);
-		      hReproduced->SetMarkerStyle(24);
+		uhist[i]->hReco->SetAxisRange(60,300);
+                TH1F *hReproduced = (TH1F*)myUnfolding.hReproduced->Clone(Form("hReproduced_cent%d",i));
+		hReproduced->SetMarkerColor(4);
+		hReproduced->SetMarkerStyle(24);
 		uhist[i]->hMeas->Draw("same");    
-		    
+		
+		TLegend *leg = new TLegend(0.5,0.5,0.9,0.9);
+		leg->SetBorderSize(0);
+		leg->SetFillStyle(0);
+		leg->AddEntry(uhist[i]->hMeas,"Measured","pl");
+		leg->AddEntry(uhist[i]->hReco,"Bayesian unfolded","pl");
+		leg->AddEntry(uhist[i]->hRecoBinByBin,"Bin-by-bin unfolded","pl");
+		leg->AddEntry(uhist[i]->hGen,"Generator level truth","l");
+		leg->Draw();
 	}	     
 
 	pbpb_Unfo->Write();
 
+        SysData systematics;
+         TLine *line = new TLine(60,1,250,1);
+
+         // Iteration systematics
+	 TCanvas *cIterSys = new TCanvas("cIterSys","",1200,600);
+	 cIterSys->Divide(2,1);
+	 cIterSys->cd(2);
+         TH1F *hRecoIterSysPP[100];
+         TH1F *hRebinPP_tmp         = rebin(uhist[nbins_cent]->hReco, "hRebinPP_tmp");
+         TLegend *legBayesianIterPP = myLegend(0.4,0.7,0.9,0.9);
+         legBayesianIterPP->AddEntry("","PP","");
+         
+         for (int j=2;j<7;j++) {
+            hRecoIterSysPP[j] = rebin(uhist[nbins_cent]->hRecoIterSys[j],Form("hRecoIterSysPP_IterSys%d",j));
+            hRecoIterSysPP[j]->SetLineColor(colorCode[j-2]);
+            hRecoIterSysPP[j]->SetMarkerColor(colorCode[j-2]);
+            hRecoIterSysPP[j]->Divide(hRebinPP_tmp);
+            if (j==2){
+               makeHistTitle(hRecoIterSysPP[j],"","Jet p_{T} (GeV/c)","Ratio (Unfolded / Nominal)");
+ 	       hRecoIterSysPP[j]->SetTitleOffset(1.5,"Y");
+               hRecoIterSysPP[j]->SetAxisRange(0,2,"Y");
+               hRecoIterSysPP[j]->Draw(); 
+            } else {
+               hRecoIterSysPP[j]->Draw("same");
+            }
+         
+            checkMaximumSys(systematics.hSysIter[nbins_cent],hRecoIterSysPP[j],0,1.1);
+            legBayesianIterPP->AddEntry(hRecoIterSysPP[j],Form("Iteration %d",j),"pl");     
+         }
+      
+         legBayesianIterPP->Draw();
+         line->Draw();
+         drawEnvelope(systematics.hSysIter[nbins_cent],"hist same");
+
+
+	 cIterSys->cd(1);
+         TH1F *hRecoIterSysPbPb[100];
+         TH1F *hRebinPbPb_tmp         = rebin(uhist[0]->hReco, "hRebinPbPb_tmp");
+         TLegend *legBayesianIterPbPb = myLegend(0.4,0.7,0.9,0.9);
+         legBayesianIterPbPb->AddEntry("","PbPb","");
+         for (int j=2;j<7;j++) {
+            hRecoIterSysPbPb[j] = rebin(uhist[0]->hRecoIterSys[j],Form("hRecoIterSysPbPb_IterSys%d",j));
+            hRecoIterSysPbPb[j]->SetLineColor(colorCode[j-2]);
+            hRecoIterSysPbPb[j]->SetMarkerColor(colorCode[j-2]);
+            hRecoIterSysPbPb[j]->Divide(hRebinPbPb_tmp);
+            if (j==2){
+               makeHistTitle(hRecoIterSysPbPb[j],"","Jet p_{T} (GeV/c)","Ratio (Unfolded / Nominal)");
+               hRecoIterSysPbPb[j]->SetTitleOffset(1.5,"Y");
+               hRecoIterSysPbPb[j]->SetAxisRange(0,2,"Y");
+               hRecoIterSysPbPb[j]->Draw(); 
+            } else {
+               hRecoIterSysPbPb[j]->Draw("same");
+            }
+         
+            checkMaximumSys(systematics.hSysIter[0],hRecoIterSysPbPb[j],0,1.1);
+            legBayesianIterPbPb->AddEntry(hRecoIterSysPbPb[j],Form("Iteration %d",j),"pl");     
+         }
+         legBayesianIterPbPb->Draw();
+         line->Draw();
+         drawEnvelope(systematics.hSysIter[0],"hist same");
 }
 
 
