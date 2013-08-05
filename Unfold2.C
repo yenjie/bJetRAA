@@ -382,7 +382,6 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 		delete hBinByBinCorRaw,hMCGen;
 		uhist[i]->hRecoBinByBin = (TH1F*) uhist[i]->hMeas->Clone(Form("hRecoBinByBin_cent%d",i));
 		uhist[i]->hRecoBinByBin->Divide(hBinByBinCor);
-//		removeZero(uhist[i]->hMeas);
 		
 		// Do unfolding
 		//if (isMC) uhist[i]->hMeas = (TH1F*)uhist[i]->hMatrix->ProjectionY()->Clone(Form("hMeas_cent%d",i));
@@ -399,6 +398,7 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 		bayesianUnfold myUnfolding(uhist[i]->hMatrixFit,myPrior.hPrior,0);
 		myUnfolding.unfold(uhist[i]->hMeas,nBayesianIter);
 		cout <<"Unfolding bin "<<i<<endl;
+
 		// Iteration Systematics
 		for (int j=2;j<=40;j++)
 		{
@@ -411,10 +411,7 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 		uhist[i]->hReco         = (TH1F*) uhist[i]->hRecoIterSys[nBayesianIter]->Clone(Form("Unfolded_cent%i",i));
 		uhist[i]->hRecoJECSys   = (TH1F*) myUnfoldingJECSys.hPrior->Clone(Form("UnfoldedJeCSys_cent%i",i));
 		uhist[i]->hRecoSmearSys   = (TH1F*) myUnfoldingSmearSys.hPrior->Clone(Form("UnfoldedSmearSys_cent%i",i));
-		//uhist[i]->hRecoBinByBin = (TH1F*) unfold2.Hreco();
 		uhist[i]->hRecoBinByBin->SetName(Form("UnfoldedBinByBin_cent%i",i));
-		
-		
 		
 		if (doToy) {
 			TCanvas *cToy = new TCanvas("cToy","toy",600,600);
@@ -441,7 +438,7 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 						hMatrixToy->SetBinContent(j,k,value);
 					}
 				}
-				//RooUnfoldBayes unfoldToy(response[i],hToy,2);
+
 				prior myPriorToy(hMatrixToy,hToy,0.0);
 				myPriorToy.unfold(hToy,1);
 				bayesianUnfold myUnfoldingToy(hMatrixToy,myPriorToy.hPrior,0.0);
@@ -463,16 +460,12 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 				if (hTmp[j]->GetMean()>0) {
 					hTmp[j]->Fit("f","LL Q ");
 					hTmp[j]->Fit("f","LL Q ");
-					//	       cToy->SaveAs(Form("toy/cent-%d-pt-%.0f.gif",i,uhist[i]->hReco->GetBinCenter(j)));
-					//     	       cout <<j<<" "<<f->GetParameter(2)<<endl;
 					uhist[i]->hReco->SetBinError(j,f->GetParameter(2));
 				}	       
 				f->SetParameters(hTmp2[j]->GetMaximum(),hTmp2[j]->GetMean(),hTmp2[j]->GetRMS());
 				if (hTmp2[j]->GetMean()>0) {
 					hTmp2[j]->Fit("f","LL Q ");
 					hTmp2[j]->Fit("f","LL Q ");
-					//cToy->SaveAs(Form("toy/cent2-%d-pt-%.0f.gif",i,uhist[i]->hReco->GetBinCenter(j)));
-					//cout <<j<<" "<<f->GetParameter(2)<<endl;
 					uhist[i]->hRecoBinByBin->SetBinError(j,f->GetParameter(2));
 				}	       
 				delete hTmp[j];
@@ -480,7 +473,7 @@ int Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int
 			}
 			cPbPb->cd(i+1);
 		}
-		//cleanup(uhist[i]->hReco);
+
 		uhist[i]->hMeas->SetMarkerStyle(20);
 		uhist[i]->hMeas->SetMarkerColor(2);
 		uhist[i]->hReco->SetMarkerStyle(25);
