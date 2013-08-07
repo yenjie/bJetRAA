@@ -54,9 +54,9 @@ static const double boundaries_recrebin_Npart[nbins_recrebin_Npart+1] = {
 	65, 300
 };
 
-static const int nColor = 5;
+static const int nColor = 20;
 static const int colorCode[nColor] = {
-	1, 2, kGreen+1, 4, 6
+  1, 2, kGreen+1, 4, 6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21
 };
 
 float CorFac[7] = {0.998,0.998,0.995,0.991,0.987,0.977,0.966};
@@ -321,15 +321,15 @@ public:
 	void DrawComponent(int i) {
 		calcTotalSys(i);
 		TH1D *h = new TH1D(Form("hSysTmp_cent%d",i),"",nbins_recrebin, boundaries_recrebin);
-		makeHistTitle(h,"","Jet p_{T} (GeV/c)","Systematic uncertainty");
+		makeHistTitle(h,(char*)"",(char*)"Jet p_{T} (GeV/c)",(char*)"Systematic uncertainty");
 		h->SetAxisRange(-0.25,0.4,"Y");
 		h->Draw();
-		TH1F* sys = drawEnvelope(hSys[i],"same",hSys[i]->GetLineColor(),1001,hSys[i]->GetLineColor(),-1);
-		TH1F* sysIter = drawEnvelope(hSysIter[i],"same",hSysIter[i]->GetLineColor(),3004,hSysIter[i]->GetLineColor(),-1);
-		TH1F* sysJEC = drawEnvelope(hSysJEC[i],"same",hSysJEC[i]->GetLineColor(),3005,hSysJEC[i]->GetLineColor(),-1);
-		TH1F* sysSmear =  drawEnvelope(hSysSmear[i],"same",hSysSmear[i]->GetLineColor(),3001,hSysSmear[i]->GetLineColor(),-1);
-		TH1F* sysEff = drawEnvelope(hSysEff[i],"same",hSysEff[i]->GetLineColor(),3002,hSysEff[i]->GetLineColor(),-1);
-		TH1F* sysNoise = drawEnvelope(hSysNoise[i],"same",hSysNoise[i]->GetLineColor(),3001,hSysNoise[i]->GetLineColor(),-1);
+		TH1F* sys = drawEnvelope(hSys[i],(char*)"same",hSys[i]->GetLineColor(),1001,hSys[i]->GetLineColor(),-1);
+		TH1F* sysIter = drawEnvelope(hSysIter[i],(char*)"same",hSysIter[i]->GetLineColor(),3004,hSysIter[i]->GetLineColor(),-1);
+		TH1F* sysJEC = drawEnvelope(hSysJEC[i],(char*)"same",hSysJEC[i]->GetLineColor(),3005,hSysJEC[i]->GetLineColor(),-1);
+		TH1F* sysSmear =  drawEnvelope(hSysSmear[i],(char*)"same",hSysSmear[i]->GetLineColor(),3001,hSysSmear[i]->GetLineColor(),-1);
+		TH1F* sysEff = drawEnvelope(hSysEff[i],(char*)"same",hSysEff[i]->GetLineColor(),3002,hSysEff[i]->GetLineColor(),-1);
+		TH1F* sysNoise = drawEnvelope(hSysNoise[i],(char*)"same",hSysNoise[i]->GetLineColor(),3001,hSysNoise[i]->GetLineColor(),-1);
 		TLine *l = new TLine(h->GetBinLowEdge(1),0,h->GetBinLowEdge(h->GetNbinsX()+1),0);
 		l->Draw();
 		TLine *l2 = new TLine(h->GetBinLowEdge(1),-0.25,h->GetBinLowEdge(1),0.4);
@@ -348,38 +348,73 @@ public:
  
 };
 
-class JetData
+class JetDataPP
 {
 public:
-	JetData(char *fileName, char *jetTree, char *genJetTree, bool loadGenJet = 1) {
-		cout <<"Open "<<fileName<<endl;
-		tFile = new TFile(fileName,"read");
-		tJet = (TTree*)tFile->Get(jetTree);
-		tJet->SetBranchAddress("jtpt" , &jtpt );
-		tJet->SetBranchAddress("refpt", &refpt);
-		tJet->SetBranchAddress("jteta", &jteta);
-		tJet->SetBranchAddress("pthat",&pthat);
-		tJet->SetBranchAddress("weight",&weight);
-		tJet->SetBranchAddress("refparton_flavorForB",&refparton_flavorForB);
-		tJet->SetBranchAddress("discr_ssvHighEff",&discr_ssvHighEff);
-		tJet->SetBranchAddress("bin",&bin);
-	};
-	TFile *tFile;
-	TTree *tJet;
-	TTree *tGenJet;
-	TTree *tEvt;
-	double jtpt;
-	double refpt;
-	double jteta;
-	double weight;
-	int refparton_flavorForB;
-	double discr_ssvHighEff;
-	double vz;
-	double pthat;
-	int njets;
-	int ngen;
-	int bin;      
+  JetDataPP(char *fileName, char *jetTree) {
+    cout <<"Open "<<fileName<<endl;
+    tFile = new TFile(fileName,"read");
+    tJet = (TTree*)tFile->Get(jetTree);
+    tJet->SetBranchAddress("jtpt" , &jtpt );
+    tJet->SetBranchAddress("refpt", &refpt);
+    tJet->SetBranchAddress("jteta", &jteta);
+    tJet->SetBranchAddress("pthat",&pthat);
+    tJet->SetBranchAddress("weight",&weight);
+    tJet->SetBranchAddress("refparton_flavorForB",&refparton_flavorForB);
+    tJet->SetBranchAddress("discr_ssvHighEff",&discr_ssvHighEff);
+    tJet->SetBranchAddress("bin",&bin);
+  };
+
+  TFile *tFile;
+  TTree *tJet;
+  double jtpt;
+  double refpt;
+  double jteta;
+  double weight;
+  int refparton_flavorForB;
+  double discr_ssvHighEff;
+  double pthat;
+  int njets;
+  int bin;     
 };
+
+
+class JetDataPbPb
+{
+public:
+  JetDataPbPb(char *fileName, char *jetTree) {
+    cout <<"Open "<<fileName<<endl;
+    tFile = new TFile(fileName,"read");
+    tJet = (TTree*)tFile->Get(jetTree);
+    tJet->SetBranchAddress("jtptA" , &jtptA );
+    tJet->SetBranchAddress("jtptB" , &jtptB );
+    tJet->SetBranchAddress("refpt", &refpt);
+    tJet->SetBranchAddress("jteta", &jteta);
+    tJet->SetBranchAddress("pthat",&pthat);
+    tJet->SetBranchAddress("weight",&weight);
+    tJet->SetBranchAddress("refparton_flavorForB",&refparton_flavorForB);
+    tJet->SetBranchAddress("discr_ssvHighEff",&discr_ssvHighEff);
+    tJet->SetBranchAddress("bin",&bin);
+    tJet->SetBranchAddress("jet65",&isTrig);
+  };
+
+  TFile *tFile;
+  TTree *tJet;
+  double jtptA;
+  double jtptB;
+  double refpt;
+  double jteta;
+  double weight;
+  int refparton_flavorForB;
+  double discr_ssvHighEff;
+  double pthat;
+  int njets;
+  int bin;     
+  int isTrig;     
+};
+
+
+
 
 class UnfoldingHistos
 {
@@ -388,9 +423,9 @@ public:
 		hResTrue       = new TH1F(Form("Restrue_cent%d",i), Form(" RooUnfold Reconstructed Truth cent%d",i)    ,    nbins_truth, boundaries_truth); //Gen
 		hResMeas       = new TH1F(Form("Resmeas_cent%d",i), Form(" RooUnfold ResMeasured_cent1%d",i),    nbins_rec, boundaries_rec); //Reco	
 		hGen           = new TH1F(Form("hGen_cent%d",i) , Form(" Generator Truth_cent%d",i)    ,    nbins_truth, boundaries_truth); //Gen
-		hMatrix        = new TH2F(Form("hMatrix_cent%d",i), Form(" Response Matrix;Genjet p_{T};Recojet p_{T}",i), nbins_truth, boundaries_truth,nbins_rec, boundaries_rec); //Matrix
-		hMatrixFit      = new TH2F(Form("hMatrixFit_cent%d",i), Form(" Response Matrix with Gaus fit;Genjet p_{T};Recojet p_{T}",i), nbins_truth, boundaries_truth,nbins_rec, boundaries_rec); //Matrix
-		hMatrixRebin   = new TH2F(Form("hMatrixRebin_cent%d",i), Form(" Response Matrix;Genjet p_{T};Recojet p_{T}",i), nbins_recrebinM, boundaries_recrebinM,nbins_recrebinM, boundaries_recrebinM); //Matrix Rebin
+		hMatrix        = new TH2F(Form("hMatrix_cent%d",i), Form(" Response Matrix;Genjet p_{T};Recojet p_{T}"), nbins_truth, boundaries_truth,nbins_rec, boundaries_rec); //Matrix
+		hMatrixFit      = new TH2F(Form("hMatrixFit_cent%d",i), Form(" Response Matrix with Gaus fit;Genjet p_{T};Recojet p_{T}"), nbins_truth, boundaries_truth,nbins_rec, boundaries_rec); //Matrix
+		hMatrixRebin   = new TH2F(Form("hMatrixRebin_cent%d",i), Form(" Response Matrix;Genjet p_{T};Recojet p_{T}"), nbins_recrebinM, boundaries_recrebinM,nbins_recrebinM, boundaries_recrebinM); //Matrix Rebin
 		hMeas          = new TH1F(Form("hMeas_cent%d",i)       , Form("Measured jet p_{T} spectra_cent%d",i)       ,nbins_rec,boundaries_rec);
 		hMeasMB          = new TH1F(Form("hMeasMB_cent%d",i)       , Form("Measured jet p_{T} spectra_cent%d",i)       ,nbins_rec,boundaries_rec);
 		hMeasJet80          = new TH1F(Form("hMeasJet80_cent%d",i)       , Form("Measured jet p_{T} spectra_cent%d",i)       ,nbins_rec,boundaries_rec);
@@ -674,7 +709,8 @@ void drawText(const char *text, float xp, float yp, int size){
 }
 
 
-void prepareNcollUnc(int nbins, float maxpt=300.){
+//void prepareNcollUnc(int nbins, float maxpt=300.){
+void prepareNcollUnc(int nbins){
 	
 	int fillsty = 1001;
 	
@@ -763,13 +799,14 @@ void DrawNpartTAABand(){
 */
  
 
-void dumpDatatoTxt(const char *centbin,TH1F *h, TH1F *hsys, TH1F *htotStat, const char *txtfile)
+//void dumpDatatoTxt(const char *centbin,TH1F *h, TH1F *hsys, TH1F *htotStat, const char *txtfile)
+void dumpDatatoTxt(TH1F *h, TH1F *hsys, TH1F *htotStat, const char *txtfile)
 {
 ofstream outf(txtfile,ios::out);
 for(int ix=1;ix<=h->GetNbinsX();ix++){
 double pt = h->GetBinCenter(ix);
 double val = h->GetBinContent(ix);
-double Uncorerr = h->GetBinError(ix);
+//double Uncorerr = h->GetBinError(ix);
 double syserr = hsys->GetBinContent(ix)-1;
 double totStaterr = htotStat->GetBinError(ix);
 
@@ -781,7 +818,7 @@ outf.close();
 
 TGraphErrors *ShiftGraph(TGraphErrors* pGraph, Double_t pNumber){
     // shifts a graph by the absolute value in the argument
-    TGraphErrors *pGraphtmp;
+    TGraphErrors *pGraphtmp=NULL;
     for (Int_t i=0;i<pGraph->GetN();i++){
 	Double_t x,y;
 	Double_t yerr;
@@ -848,7 +885,8 @@ void DrawPanelLabel(int i){
  }
 
 
-TH2F* fitMatrix(TH2F *hMatrix,int verbose=0, double recoJetPtCut = 0)
+//TH2F* fitMatrix(TH2F *hMatrix,int verbose=0, double recoJetPtCut = 0)
+TH2F* fitMatrix(TH2F *hMatrix, double recoJetPtCut = 0)
 {
     TF1 *f = new TF1("f","[0]*TMath::Gaus(x,[1],[2])");
     TH2F *hMatrixFit = (TH2F*)hMatrix->Clone(Form("hMatrixFit_cent"));
@@ -936,7 +974,8 @@ TH2F* fitMatrix(TH2F *hMatrix,int verbose=0, double recoJetPtCut = 0)
     return hMatrixFit;
 }
 
-TH2F* fitMatrix2(TH2F *hMatrix,int verbose=0, double recoJetPtCut = 0)
+//TH2F* fitMatrix2(TH2F *hMatrix,int verbose=0, double recoJetPtCut = 0)
+TH2F* fitMatrix2(TH2F *hMatrix, double recoJetPtCut = 0)
 {
     TF1 *f = new TF1("f","[0]*TMath::Gaus(x,[1],[2])");
     TH2F *hMatrixFit = (TH2F*)hMatrix->Clone(Form("hMatrixFit_cent"));
