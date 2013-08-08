@@ -31,23 +31,26 @@ using namespace std;
 
 static const int nbins_truth = 17;
 static const double boundaries_truth[nbins_truth+1] = {
-	0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
+  0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
+  //30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
 };
 
 // Measurement binning
 static const int nbins_rec = 17;
 static const double boundaries_rec[nbins_rec+1] = {
-	0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
+  0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
+  //30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
 };
 
 static const int nbins_recrebin = 17;
 static const double boundaries_recrebin[nbins_recrebin+1] = {
-	0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
+  0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
+  //30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
 };
 
 static const int nbins_recrebinM = 9;
 static const double boundaries_recrebinM[nbins_recrebinM+1] = {
-	0,15,30,60, 70, 85, 105, 130, 170, 250
+  0,15,30,60, 70, 85, 105, 130, 170, 250
 };
 static const int nbins_recrebin_Npart = 1;
 static const double boundaries_recrebin_Npart[nbins_recrebin_Npart+1] = {
@@ -556,18 +559,18 @@ TH1F *rebin_Npart(TH1F *h, char *histName)
 // divide by bin width
 void divideBinWidth(TH1 *h)
 {
-	h->Sumw2();
-	for (int i=0;i<=h->GetNbinsX();i++)
-	{
-		Float_t val = h->GetBinContent(i);
-		Float_t valErr = h->GetBinError(i);
-		val/=h->GetBinWidth(i);
-		valErr/=h->GetBinWidth(i);
-		h->SetBinContent(i,val);
-		h->SetBinError(i,valErr);
-	}
-	h->GetXaxis()->CenterTitle();
-	h->GetYaxis()->CenterTitle();
+  //h->Sumw2();
+  for (int i=0;i<=h->GetNbinsX();i++)
+    {
+      Float_t val = h->GetBinContent(i);
+      Float_t valErr = h->GetBinError(i);
+      val/=h->GetBinWidth(i);
+      valErr/=h->GetBinWidth(i);
+      h->SetBinContent(i,val);
+      h->SetBinError(i,valErr);
+    }
+  h->GetXaxis()->CenterTitle();
+  h->GetYaxis()->CenterTitle();
 }
 
 

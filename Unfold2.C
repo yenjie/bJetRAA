@@ -24,7 +24,7 @@ using namespace std;
 // Update Yen-Jie Lee 06.22.12
 //==============================================================================
 
-void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int doToy = 0, int isMC = 0,char *spectraFileName = (char*)"pbpb_spectra_akPu3PF.root",double recoJetPtCut = 60,double trackMaxPtCut = 0, int nBayesianIter = 4, int doBjets=1) // algo 2 =akpu2 ; 3 =akpu3 ; 4 =akpu4 ;1 = icpu5
+void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, int doToy = 0, int isMC = 0,char *spectraFileName = (char*)"pbpb_spectra_akPu3PF.root",double recoJetPtCut = 60.,double trackMaxPtCut = 0, int nBayesianIter = 4, int doBjets=0) // algo 2 =akpu2 ; 3 =akpu3 ; 4 =akpu4 ;1 = icpu5
 {
   
   gStyle->SetErrorX(0.);
@@ -45,9 +45,9 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
   char *fileNamePbPb_data = NULL;
 
   if(doBjets)fileNamePP_data = (char*)"~/Work/bTagging/outputTowardsFinal/NewFormatV4_bFractionMCTemplate_pppp1_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root";
-  else fileNamePP_data = (char*)"../histos/rawIncSpectra_MB.root";
+  else fileNamePP_data = (char*)"../histos/rawIncSpectra_MB_varSize.root";
   if(doBjets)fileNamePbPb_data = (char*)"~/Work/bTagging/outputTowardsFinal/AltBinningV6_bFractionMCTemplate_ppPbPb1_SSVHEat2.0FixCL0_bin_0_40_eta_0_2.root";
-  else fileNamePbPb_data = (char*)"../histos/rawIncSpectra_MB.root";
+  else fileNamePbPb_data = (char*)"../histos/rawIncSpectra_MB_varSize.root";
   if(doBjets) fileNamePP_mc = (char*)"~/Work/bTagging/histos/ppMC_ppReco_ak3PF_BjetTrig_noIPupperCut.root";
   else fileNamePP_mc = (char*)"~/Work/bTagging/histos/ppMC_ppReco_ak3PF_QCDjetTrig_noIPupperCut.root";
   if(doBjets)fileNamePbPb_mc = (char*) "~/Work/bTagging/histos/PbPbBMC_pt30by3_ipHICalibCentWeight_noTrig.root";
@@ -161,10 +161,10 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
       if ( dataPbPb->jteta  > 2. || dataPbPb->jteta < -2. ) continue;
       if ( dataPbPb->refpt<0) dataPbPb->refpt=0;
       if (doBjets && fabs(dataPbPb->refparton_flavorForB)!=5) continue;
-      if (doBjets&& dataPbPb->discr_ssvHighEff<2) continue;
+      //if (doBjets&& dataPbPb->discr_ssvHighEff<2) continue;
       if (doBjets && dataPbPb->jtptB < recoJetPtCut) continue;
       if (!doBjets && dataPbPb->jtptA < recoJetPtCut) continue;
-      //if ( dataPbPb->isTrig <1) continue;
+      if ( dataPbPb->isTrig <1) continue;
       
       if(!doBjets)if(dataPbPb->refpt < 50 && dataPbPb->jtptA>120) continue;
       if(doBjets)if(dataPbPb->refpt < 50 && dataPbPb->jtptB>120) continue;
@@ -194,7 +194,7 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
       if ( dataPP->jteta  > 2. || dataPP->jteta < -2. ) continue;
       if ( dataPP->refpt<0) dataPP->refpt=0;
       if ( doBjets && fabs(dataPP->refparton_flavorForB)!=5) continue;
-      if ( doBjets && dataPP->discr_ssvHighEff<2) continue;
+      //if ( doBjets && dataPP->discr_ssvHighEff<2) continue;
       if ( dataPP->jtpt < recoJetPtCut) continue;
       
       if (!isMC||jentry2 % 2 == 1) {
@@ -304,18 +304,28 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
 	if(doBjets){
 	  float tagEff =hTagEffPbPb->GetBinContent(i);
 	  float tagEffErr =     hTagEffPbPb->GetBinError(i);   
+	  
 	  if(tagEff>0){
-	    binContent/=tagEff;
+	    // careful of the order here!
 	    binError=binContent/tagEff *sqrt(tagEffErr*tagEffErr/tagEff/tagEff + binError*binError/binContent/binContent);
+	    binContent /= tagEff;
 	  }
 	  else cout<<" TAGEFF = 0"<<endl;	  
 	}
 
+     	float binCenter = hMattPbPb->GetBinCenter(i);  
+	if(binCenter - hMattPbPb->GetBinWidth(i)/2.  < recoJetPtCut) continue;
+	
+	int ibin=0;
 
-	uhist[0]->hMeas->SetBinContent(i+uhist[0]->hMeas->FindBin(61)-1,binContent);  
-	uhist[0]->hMeas->SetBinError(i+uhist[0]->hMeas->FindBin(61)-1,binError);  
-	//uhist[0]->hMeas->SetBinContent(i,hMattPbPb->GetBinContent(i));  
-	//uhist[0]->hMeas->SetBinError(i,hMattPbPb->GetBinError(i));  
+	for(ibin=1;ibin<=uhist[0]->hMeas->GetNbinsX();ibin++){
+	  float testLowEdge = uhist[0]->hMeas->GetBinLowEdge(ibin);
+	  float testBinWidth = uhist[0]->hMeas->GetBinWidth(ibin);
+	  if(binCenter>testLowEdge && binCenter < testLowEdge+testBinWidth) break;
+	}
+	uhist[0]->hMeas->SetBinContent(ibin,binContent);  
+	uhist[0]->hMeas->SetBinError(ibin,binError);  
+
       }
 
     // pp file:
@@ -339,14 +349,26 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
 	  float tagEff =hTagEffPP->GetBinContent(i);
 	  float tagEffErr =     hTagEffPP->GetBinError(i);   
 	  if(tagEff>0){
-	    binContent/=tagEff;
+	    // careful of the order here!
 	    binError=binContent/tagEff *sqrt(tagEffErr*tagEffErr/tagEff/tagEff + binError*binError/binContent/binContent);
+	    binContent /= tagEff;
 	  }
 	  else cout<<" TAGEFF = 0"<<endl;	  
 	}
 	
-	uhist[nbins_cent]->hMeas->SetBinContent(i+uhist[nbins_cent]->hMeas->FindBin(61)-1,binContent);  
-	uhist[nbins_cent]->hMeas->SetBinError(i+uhist[nbins_cent]->hMeas->FindBin(61)-1,binError);  
+     	float binCenter = hMattPP->GetBinCenter(i);  
+	if(binCenter - hMattPP->GetBinWidth(i)/2.  < recoJetPtCut) continue;
+
+	int ibin=0;
+
+	for(ibin=1;ibin<=uhist[nbins_cent]->hMeas->GetNbinsX();ibin++){
+	  float testLowEdge = uhist[nbins_cent]->hMeas->GetBinLowEdge(ibin);
+	  float testBinWidth = uhist[nbins_cent]->hMeas->GetBinWidth(ibin);
+	  if(binCenter>testLowEdge && binCenter < testLowEdge+testBinWidth) break;
+	}
+	uhist[nbins_cent]->hMeas->SetBinContent(ibin,binContent);  
+	uhist[nbins_cent]->hMeas->SetBinError(ibin,binError);  
+
     
 	/*
 	cout<<" i "<<i<<endl;
@@ -494,7 +516,7 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     uhist[i]->hReco->Draw("same");    
     uhist[i]->hRecoBinByBin->SetMarkerStyle(28);
     uhist[i]->hRecoBinByBin->Draw("same");    
-    uhist[i]->hReco->SetAxisRange(60,300);
+    uhist[i]->hReco->SetAxisRange(recoJetPtCut,300);
     TH1F *hReproduced = (TH1F*)myUnfolding.hReproduced->Clone(Form("hReproduced_cent%d",i));
     hReproduced->SetMarkerColor(4);
     hReproduced->SetMarkerStyle(24);
