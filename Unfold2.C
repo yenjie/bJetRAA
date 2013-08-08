@@ -477,6 +477,13 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     uhist[i]->hMeas->Draw();
     hReproduced->Draw("same");
 
+    TLegend *leg2 = new TLegend(0.5,0.5,0.85,0.9);
+    leg2->SetBorderSize(0);
+    leg2->SetFillStyle(0);
+    leg2->AddEntry(uhist[i]->hMeas,"Measured","pl");
+    leg2->AddEntry(hReproduced,"Reproduced","pl");
+
+    leg2->Draw();
   }	     
 
  
