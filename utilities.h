@@ -51,7 +51,7 @@ static const double boundaries_recrebinM[nbins_recrebinM+1] = {
 };
 static const int nbins_recrebin_Npart = 1;
 static const double boundaries_recrebin_Npart[nbins_recrebin_Npart+1] = {
-	65, 300
+	65, 250
 };
 
 static const int nColor = 20;
