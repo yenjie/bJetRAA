@@ -58,10 +58,11 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
   if(doBjets)fileNamePbPb_mc = (char*) "~/Work/bTagging/histos/PbPbBMC_pt30by3_ipHICalibCentWeight_noTrig.root";
   else fileNamePbPb_mc = (char*) "~/Work/bTagging/histos/PbPbQCDMC_pt30by3_ipHICalibCentWeight_noTrig.root";
 
+
   // grab ntuples
   TFile *infPbPb_mc = new TFile(fileNamePbPb_mc);
   TFile *infPP_mc = new TFile(fileNamePP_mc);
-
+  
 
   string bJetString = "Inc";
   if(doBjets) bJetString = "bJets";
@@ -105,45 +106,6 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
   // Come back to the output file dir
   pbpb_Unfo->cd();
 
-  // Get Jet spectra from data file
-  cout <<"Reading data..."<<endl;
-
-  // This doesn't seem to be relevant for the moment -Matt
-  /*	
-
-  TTree *tPbPbJet = (TTree*)infPbPb_mc->Get("nt");
-  TTree *tPPJet  = (TTree*)infPP_mc->Get("nt");
-
-
-  TCanvas * cInput = new TCanvas("cInput","Input",800,400);
-  cInput->Divide(2,1);
-		
-  cout <<"Spectra..."<<endl;	
-	
-  for (int i=0;i<=nbins_cent;i++){
-    cout <<nbins_cent<<endl;
-    TCut centCut = Form("bin<%.0f&&bin>=%.0f",boundaries_cent[i+1],boundaries_cent[i]);
-    if (useSpectraFromFile) {
-      uhist[i]->hMeas = (TH1F*)fSpectra->Get(Form("hMeas_cent%d",i));
-    } else {
-      if (!isMC) {
-	tPbPbJet->Project(Form("hMeas_cent%d",i),"jtptB", dataSelection&&centCut&&TriggerSelectionPbPb80);
-      }   
-    }
-		
-    if (useMatrixFromFile) {
-      cout <<"Matrix"<<endl;
-      uhist[i]->hMatrixFit = (TH2F*) fSpectra->Get(Form("hMatrixFit_cent%d",i));
-      uhist[i]->hMeasMatch = (TH1F*)((TH2F*) fSpectra->Get(Form("hMatrixFit_cent%d",i)))->ProjectionY();
-      uhist[i]->hMeasMatch->Divide(uhist[i]->hMeas);
-    } else {
-      uhist[i]->hMeasMatch = 0;
-    }
-    uhist[i]->hMeas->Draw();
-  }
-
-  if (!isMC) tPPJet->Project(Form("hMeas_cent%d",nbins_cent),"jtpt",dataSelectionPP&&TriggerSelectionPP);
-  */
   cout <<"MC..."<<endl;	
   
   TH1F *hCent = new TH1F("hCent","",nbins_cent,boundaries_cent);
@@ -181,13 +143,7 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
       
       // change when we switch to centrality binning
       int cBin = 0;
-      
-      //int cBin = hCent->FindBin(dataPbPb->bin)-1;
-      /*
-	if (cBin>=nbins_cent) continue;
-	if (cBin==-1) continue;
-      */
-      
+            
       if ( dataPbPb->refpt  < 0. ) continue;
       if ( dataPbPb->jteta  > 2. || dataPbPb->jteta < -2. ) continue;
       if ( dataPbPb->refpt<0) dataPbPb->refpt=0;
@@ -262,6 +218,7 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     }
   }
 
+<<<<<<< HEAD
   for (int i=0;i<=nbins_cent;i++){
     for (int x=1;x<=uhist[i]->hMatrix->GetNbinsX();x++) {
 	float binContent = uhist[i]->hMeas->GetBinContent(x);
@@ -301,9 +258,8 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     }
     else hMattPbPb = (TH1F*) infMatt->Get("hPbPb");
     //divideBinWidth(hMattPbPb);
-
-
-    
+           
+    // Need to match the binning carefully, please double check whenever you change the binning
     for (int i=1;i<=hMattPbPb->GetNbinsX();i++)
       {
      	float binContent = hMattPbPb->GetBinContent(i);  
@@ -364,8 +320,7 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
       hTagEffPP = (TH1F*) infMattPP->Get("hBEfficiencyMC");
     }
     else hMattPP = (TH1F*) infMattPP->Get("hpp");
-    //divideBinWidth(hMattPP);
-	   
+    //divideBinWidth(hMattPP);	   
     for (int i=1;i<=hMattPP->GetNbinsX();i++)
       {
       	float binContent = hMattPP->GetBinContent(i);  
@@ -410,6 +365,8 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
 
 
 
+   //=========================================Response Matrix========================================================= 
+
   cout <<"Response Matrix..."<<endl;
 	
   TCanvas * cMatrix = new TCanvas("cMatrix","Matrix",800,400);
@@ -438,6 +395,7 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
       }
     }
     uhist[i]->hResponse = (TH2F*)uhist[i]->hMatrix->Clone(Form("hResponse_cent%d",i));
+
     for (int y=1;y<=uhist[i]->hResponse->GetNbinsY();y++) {
       double sum=0;
       for (int x=1;x<=uhist[i]->hResponse->GetNbinsX();x++) {
@@ -455,6 +413,20 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
       }
     }
 		
+    TH1F *hProj = (TH1F*)uhist[i]->hResponse->ProjectionY(Form("hProj_cent%d",i));
+    
+    for (int y=1;y<=uhist[i]->hResponse->GetNbinsY();y++) {
+      for (int x=1;x<=uhist[i]->hResponse->GetNbinsX();x++) {  	
+	double sum=hProj->GetBinContent(y);
+	cout <<y<<" "<<x<<" "<<sum<<endl;
+	if (sum==0) continue;
+	double ratio = uhist[i]->hMeas->GetBinContent(y)/sum;
+	if (uhist[i]->hMeas->GetBinContent(y)==0) ratio = 1e-100/sum;
+        uhist[i]->hResponse->SetBinContent(x,y,uhist[i]->hResponse->GetBinContent(x,y)*ratio);
+	uhist[i]->hResponse->SetBinError(x,y,uhist[i]->hResponse->GetBinError(x,y)*ratio);
+      }
+    }
+
     uhist[i]->hResponseNorm = (TH2F*)uhist[i]->hMatrix->Clone(Form("hResponseNorm_cent%d",i));
     for (int x=1;x<=uhist[i]->hResponseNorm->GetNbinsX();x++) {
       double sum=0;
@@ -480,8 +452,6 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     uhist[i]->hMatrixFit->SetName(Form("hMatrixFit_cent%d",i));
   }
 
-
- 
   pbpb_Unfo->cd();
 	
   cout << "==================================== UNFOLD ===================================" << endl;
@@ -496,6 +466,11 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
   TH1F *hRecoBW[nbins_cent+1], *hRecoBinByBinBW[nbins_cent+1], *hMeasBW[nbins_cent+1], *hGenBW[nbins_cent+1];
 
 
+  TCanvas * cPbPbMeas = new TCanvas("cPbPbMeas","Measurement",1200,600);
+  cPbPbMeas->Divide(2,1); 
+  cPbPbMeas->cd(1);
+	
+
   for (int i=0;i<=nbins_cent;i++) {
     cPbPb->cd(i+1)->SetLogy();   
     // Do Bin-by-bin
@@ -505,8 +480,6 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     TF1 *f = new TF1("f","[0]+[1]*x");
     hBinByBinCorRaw->Fit("f","LL ","",90,300);
     TH1F* hBinByBinCor = (TH1F*)hBinByBinCorRaw->Clone();//functionHist(f,hBinByBinCorRaw,Form("hBinByBinCor_cent%d",i));
-    delete hBinByBinCorRaw;
-    delete hMCGen;
     uhist[i]->hRecoBinByBin = (TH1F*) uhist[i]->hMeas->Clone(Form("hRecoBinByBin_cent%d",i));
     uhist[i]->hRecoBinByBin->Divide(hBinByBinCor);
 		
@@ -515,8 +488,11 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     prior myPrior(uhist[i]->hMatrixFit,uhist[i]->hMeas,0);
     myPrior.unfold(uhist[i]->hMeas,1);
     TH1F *hPrior;//=(TH1F*) functionHist(fPow,uhist[i]->hMeas,Form("hPrior_cent%d",i));
-    hPrior = (TH1F*)uhist[i]->hGen->Clone("hPrior");//(TH1F*)uhist[i]->hMeas->Clone(Form("hPrior_cent%d",i));
+//    hPrior = (TH1F*)uhist[i]->hGen->Clone("hPrior");
+//    hPrior = (TH1F*)uhist[i]->hMeas->Clone(Form("hPrior_cent%d",i));
+    hPrior=(TH1F*)hMCGen->Clone("hPrior");
     removeZero(hPrior);
+    TH1F *hReweighted = (TH1F*)(TH1F*)uhist[i]->hResponse->ProjectionY(Form("hReweighted_cent%d",i));
 		
     bayesianUnfold myUnfoldingJECSys(uhist[i]->hMatrixFit,hPrior,0);
     myUnfoldingJECSys.unfold(uhist[i]->hMeasJECSys,nBayesianIter);
@@ -525,6 +501,9 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     bayesianUnfold myUnfolding(uhist[i]->hMatrixFit,myPrior.hPrior,0);
     myUnfolding.unfold(uhist[i]->hMeas,nBayesianIter);
     cout <<"Unfolding bin "<<i<<endl;
+
+    delete hBinByBinCorRaw;
+    delete hMCGen;
 
     // Iteration Systematics
     for (int j=2;j<=7;j++)
@@ -613,12 +592,16 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     uhist[i]->hReco->SetYTitle("Counts");    
     uhist[i]->hReco->GetXaxis()->SetNdivisions(505);
     //uhist[i]->hReco->Draw("");    
+    uhist[i]->hReco->SetAxisRange(0,250,"X");
+    uhist[i]->hReco->Draw("");   
+     
     uhist[i]->hGen->SetLineWidth(2);
     uhist[i]->hGen->SetLineColor(2);
     //if(isMC)uhist[i]->hGen->Draw("hist same");
     //uhist[i]->hReco->Draw("same");    
     uhist[i]->hRecoBinByBin->SetMarkerStyle(28);
     uhist[i]->hRecoBinByBin->Draw("same");    
+
     uhist[i]->hReco->SetAxisRange(recoJetPtCut,300);
     TH1F *hReproduced = (TH1F*)myUnfolding.hReproduced->Clone(Form("hReproduced_cent%d",i));
     hReproduced->SetMarkerColor(4);
@@ -640,6 +623,7 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     hRecoBinByBinBW[i]->Draw("same");
     hMeasBW[i]->Draw("same");
     
+
     uhist[i]->hReco->SetTitle("Baysian Unfolded");
     uhist[i]->hRecoBinByBin->SetTitle("Bin-by-bin Unfolded");
 
@@ -651,6 +635,19 @@ void Unfold2(int algo= 3,bool useSpectraFromFile=0, bool useMatrixFromFile=0, in
     leg->AddEntry(uhist[i]->hRecoBinByBin,"Bin-by-bin unfolded","pl");
     if(isMC)leg->AddEntry(uhist[i]->hGen,"Generator level truth","l");
     leg->Draw();
+
+    cPbPbMeas->cd(i+1)->SetLogy();   
+    uhist[i]->hMeas->SetAxisRange(0,240,"X");
+    uhist[i]->hMeas->Draw();
+    hReproduced->Draw("same");
+
+    TLegend *leg2 = new TLegend(0.5,0.5,0.85,0.9);
+    leg2->SetBorderSize(0);
+    leg2->SetFillStyle(0);
+    leg2->AddEntry(uhist[i]->hMeas,"Measured","pl");
+    leg2->AddEntry(hReproduced,"Reproduced","pl");
+
+    leg2->Draw();
   }	     
   
  
