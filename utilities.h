@@ -28,29 +28,47 @@
 using namespace std;
 
 // Truth binning
-
-static const int nbins_truth = 17;
+static const int nbins_truth = 19;
+//static const int nbins_truth = 29;
 static const double boundaries_truth[nbins_truth+1] = {
-  0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
-  //30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
+  0,5,10,15,20,25,30,35,40,45,50,55, 60,70,80,90,110,130,170,250
+  //0,5,10,15,20,25,30,35,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250
 };
 
 // Measurement binning
-static const int nbins_rec = 17;
+static const int nbins_rec = 19;
+//static const int nbins_rec = 29;
 static const double boundaries_rec[nbins_rec+1] = {
-  0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
-  //30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
+  0,5,10,15,20,25,30,35,40,45,50,55, 60,70,80,90,110,130,170,250
+  //0,5,10,15,20,25,30,35,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250
 };
 
-static const int nbins_recrebin = 17;
+static const double trigEffInc[nbins_rec]={
+  // analysis bins
+  0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,  0.966051, 0.99591,0.999665, 1., 1., 1., 1.
+  // fixed bins
+  //0.,0.,0.,0.,0.,0.,0.,0.,  0.147962,  0.333594,  0.660276,  0.895285,  0.962878,  0.98712,  0.996501,  0.998231,  0.999611,  0.999245,  1.,  0.998698,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.
+
+};
+
+static const double trigEffbJet[nbins_rec]={
+  // analysis bins
+  0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0., 0.903361, 0.979075, 0.991913, 0.996636, 0.999653, 0.99986, 1.
+  // fixed bins
+  //0.,0.,0.,0.,0.,0.,0.,0.,  0.183863,  0.427385,  0.777265,  0.951006,  0.988485,  0.99895,  0.999991,  0.999859,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1., 1., 1.
+};
+  
+
+static const int nbins_recrebin = 19;
+//static const int nbins_recrebin = 29;
 static const double boundaries_recrebin[nbins_recrebin+1] = {
-  0,5,10,15,20,25,30,35,40,45,50, 60, 70, 85, 105, 130, 170, 250
-  //30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200
+  0,5,10,15,20,25,30,35,40,45,50,55, 60,70,80,90,110,130,170,250
+  //0,5,10,15,20,25,30,35,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250
 };
 
-static const int nbins_recrebinM = 9;
+static const int nbins_recrebinM = 12;
 static const double boundaries_recrebinM[nbins_recrebinM+1] = {
-  0,15,30,60, 70, 85, 105, 130, 170, 250
+  0,15,30, 60, 65, 70, 75, 80, 90, 105, 130, 170, 250
 };
 static const int nbins_recrebin_Npart = 1;
 static const double boundaries_recrebin_Npart[nbins_recrebin_Npart+1] = {
@@ -398,7 +416,7 @@ public:
     tJet->SetBranchAddress("refparton_flavorForB",&refparton_flavorForB);
     tJet->SetBranchAddress("discr_ssvHighEff",&discr_ssvHighEff);
     tJet->SetBranchAddress("bin",&bin);
-    tJet->SetBranchAddress("jet65",&isTrig);
+    tJet->SetBranchAddress("jet55",&isTrig);
   };
 
   TFile *tFile;
